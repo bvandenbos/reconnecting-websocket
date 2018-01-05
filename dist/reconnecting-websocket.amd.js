@@ -124,6 +124,8 @@ define("index", ["require", "exports"], function (require, exports) {
             const urlPromise = (typeof url === 'string') ? Promise.resolve(url) : url();
             return urlPromise.then((connectionUrl) => {
                 fireEventListeners('reconnecting', {});
+                if (ws)
+                    fireEventListeners('reconnecting', {});
                 ws = new config.constructor(connectionUrl, protocols);
                 connectingTimeout = setTimeout(() => {
                     log('timeout');
