@@ -116,7 +116,6 @@ const ReconnectingWebsocket = function (url, protocols, options = {}) {
         log('connect');
         const urlPromise = (typeof url === 'string') ? Promise.resolve(url) : url();
         return urlPromise.then((connectionUrl) => {
-            fireEventListeners('reconnecting', {});
             if (ws)
                 fireEventListeners('reconnecting', {});
             ws = new config.constructor(connectionUrl, protocols);

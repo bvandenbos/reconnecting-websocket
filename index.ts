@@ -170,7 +170,6 @@ const ReconnectingWebsocket = function(
 
         const urlPromise = (typeof url === 'string') ? Promise.resolve(url) : url()
         return urlPromise.then((connectionUrl: string) => {
-            fireEventListeners('reconnecting', {} );
             if (ws) fireEventListeners('reconnecting', {});
             ws = new (<any>config.constructor)(connectionUrl, protocols);
 
