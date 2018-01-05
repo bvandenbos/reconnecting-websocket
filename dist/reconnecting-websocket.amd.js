@@ -49,7 +49,6 @@ define("index", ["require", "exports"], function (require, exports) {
         let retriesCount = 0;
         let shouldRetry = true;
         let savedOnClose = null;
-        let nextReconnectImmediate = false;
         const listeners = {};
         // require new to construct
         if (!(this instanceof ReconnectingWebsocket)) {
@@ -102,14 +101,9 @@ define("index", ["require", "exports"], function (require, exports) {
             }
             log('handleClose - reconnectDelay:', reconnectDelay);
             if (shouldRetry) {
-                if (nextReconnectImmediate) {
-                    connect();
-                }
-                else {
-                    setTimeout(connect, reconnectDelay);
-                    const event = { detail: reconnectDelay };
-                    fireEventListeners('reconnectscheduled', event);
-                }
+                setTimeout(connect, reconnectDelay);
+                const event = { detail: reconnectDelay };
+                fireEventListeners('reconnectscheduled', event);
             }
         };
         const fireEventListeners = (type, event) => {

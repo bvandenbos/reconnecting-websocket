@@ -90,7 +90,6 @@ const ReconnectingWebsocket = function(
     let retriesCount = 0;
     let shouldRetry = true;
     let savedOnClose: any = null;
-    let nextReconnectImmediate: boolean = false;
     const listeners: EventListeners = {};
 
     // require new to construct
@@ -151,13 +150,9 @@ const ReconnectingWebsocket = function(
         log('handleClose - reconnectDelay:', reconnectDelay);
 
         if (shouldRetry) {
-            if (nextReconnectImmediate) {
-                connect();
-            } else {
-                setTimeout(connect, reconnectDelay);
-                const event = <CustomEvent>{ detail: reconnectDelay };    
-                fireEventListeners('reconnectscheduled', event)
-            }
+            setTimeout(connect, reconnectDelay);
+            const event = <CustomEvent>{ detail: reconnectDelay };    
+            fireEventListeners('reconnectscheduled', event)
         }
     };
 

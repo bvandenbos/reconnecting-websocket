@@ -48,7 +48,6 @@ const ReconnectingWebsocket = function (url, protocols, options = {}) {
     let retriesCount = 0;
     let shouldRetry = true;
     let savedOnClose = null;
-    let nextReconnectImmediate = false;
     const listeners = {};
     // require new to construct
     if (!(this instanceof ReconnectingWebsocket)) {
@@ -101,14 +100,9 @@ const ReconnectingWebsocket = function (url, protocols, options = {}) {
         }
         log('handleClose - reconnectDelay:', reconnectDelay);
         if (shouldRetry) {
-            if (nextReconnectImmediate) {
-                connect();
-            }
-            else {
-                setTimeout(connect, reconnectDelay);
-                const event = { detail: reconnectDelay };
-                fireEventListeners('reconnectscheduled', event);
-            }
+            setTimeout(connect, reconnectDelay);
+            const event = { detail: reconnectDelay };
+            fireEventListeners('reconnectscheduled', event);
         }
     };
     const fireEventListeners = (type, event) => {
