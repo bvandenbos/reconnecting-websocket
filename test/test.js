@@ -59,7 +59,6 @@ test.cb('max retries', t => {
     const ws = new RWS(url, null, {
         constructor: HWS,
         maxRetries: 2,
-        reconnectionDelayFactor: 0,
         maxReconnectionDelay: 0,
         minReconnectionDelay: 0,
     });
@@ -81,7 +80,6 @@ test.cb('level0 event listeners are reassigned after reconnect', t => {
     const ws = new RWS(url, null, {
         constructor: HWS,
         maxRetries: 4,
-        reconnectionDelayFactor: 1.2,
         maxReconnectionDelay: 20,
         minReconnectionDelay: 10,
     });
@@ -125,7 +123,6 @@ test.cb('level0 event listeners are reassigned after closing with fastClose', t 
 
     const ws = new RWS(url, null, {
         constructor: HWS,
-        reconnectionDelayFactor: 1.2,
         maxReconnectionDelay: 20,
         minReconnectionDelay: 10,
     });
@@ -162,7 +159,6 @@ test.cb('level2 event listeners (addEventListener, removeEventListener)', t => {
     const ws = new RWS(url, null, {
         constructor: HWS,
         maxRetries: 3,
-        reconnectionDelayFactor: 1.2,
         maxReconnectionDelay: 60,
         minReconnectionDelay: 11,
     });
@@ -401,3 +397,44 @@ test.cb('#14 fix - closing with keepClose before open', t => {
         t.end();
     }, 1000);
 });
+
+test.cb('reconnectScheduled eventListener is called', t => {
+    const wss = new WSS({port: PORT});
+    wss.on('connection', ws =>  wss.close());
+
+    const reconnectScheduled = (e) => {
+        t.is(e.detail, 10)
+        t.pass('reconnectScheduled called');
+        wss.close();
+        t.end();
+    }
+
+    const ws = new RWS(url, null, {
+        constructor: HWS,
+        maxRetries: 1,
+        reconnectionDelayGrowFactor: 1.0,
+        maxReconnectionDelay: 10,
+        minReconnectionDelay: 10,
+    });
+    ws.addEventListener('reconnectscheduled', reconnectScheduled);
+})
+
+test.cb('reconnecting eventListener is called', t => {
+    const wss = new WSS({port: PORT});
+    wss.on('connection', ws =>  wss.close());
+
+    const reconnecting = () => {
+        t.pass('reconnecting called');
+        wss.close();
+        t.end();
+    }
+
+    const ws = new RWS(url, null, {
+        constructor: HWS,
+        maxRetries: 1,
+        reconnectionDelayGrowFactor: 1.0,
+        maxReconnectionDelay: 10,
+        minReconnectionDelay: 10,
+    });
+    ws.addEventListener('reconnecting', reconnecting);
+})
