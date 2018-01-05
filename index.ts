@@ -90,6 +90,7 @@ const ReconnectingWebsocket = function(
     let retriesCount = 0;
     let shouldRetry = true;
     let savedOnClose: any = null;
+    let timer: any = null;
     const listeners: EventListeners = {};
 
     // require new to construct
@@ -150,7 +151,7 @@ const ReconnectingWebsocket = function(
         log('handleClose - reconnectDelay:', reconnectDelay);
 
         if (shouldRetry) {
-            setTimeout(connect, reconnectDelay);
+            timer = setTimeout(connect, reconnectDelay);
             const event = <CustomEvent>{ detail: reconnectDelay };    
             fireEventListeners('reconnectscheduled', event)
         }
@@ -255,7 +256,7 @@ const ReconnectingWebsocket = function(
     };
 
     this.send = (data: any) => {
-        ws.send(data)
+        ws.send(data);
     };
 
     // Define Level 0 event stubs
@@ -294,6 +295,18 @@ const ReconnectingWebsocket = function(
         }
         if (ws) ws.removeEventListener(type, listener, options);
     };
+
+    this.reconnect = (code = 1000, reason = '') => {
+        // Clear the timeout incase we've already scheduled a reconect
+        clearTimeout(timer);
+        if (ws.readyState !== ws.CLOSED) {
+            // If the ws isn't closed, close it now and keep it closed
+            this.close(code, reason, { keepClosed: true });
+        }
+        // Re-enable retry
+        shouldRetry = true;
+        connect();
+    }
 
 };
 
